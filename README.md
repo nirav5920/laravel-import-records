@@ -36,9 +36,10 @@ php artisan migrate
 ## How to Use
 
 ### Please run the below command in your application
+- This command automatically generates all the required files for the import record process.
 
 ```php
-    php artisan import-records:make-user-import-assets
+php artisan import-records:make-user-import-assets
 ```
 ### OR you can follow the manual process in your application
 
