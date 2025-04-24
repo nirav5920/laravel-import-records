@@ -3,10 +3,13 @@
 namespace Codebyray\ImportRecords\services;
 
 use Carbon\Carbon;
+use Closure;
 use Codebyray\ImportRecords\Exceptions\RedirectBackWithErrorException;
+use Codebyray\ImportRecords\Http\Resources\ImportRecordResource;
 use Codebyray\ImportRecords\Interfaces\ImportRecordClassInterface;
 use Codebyray\ImportRecords\Jobs\ImportRecordsJob;
 use Codebyray\ImportRecords\Queries\ImportRecordQueries;
+use GuzzleHttp\Psr7\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -15,12 +18,8 @@ use Throwable;
 
 class ImportRecordService
 {
-    public function processToImport(UploadedFile $file, int $typeId, int $createdById, ImportRecordClassInterface $importModuleFile)
+    public function processToImport(UploadedFile $file, int $typeId, array $metaData, ImportRecordClassInterface $importModuleFile)
     {
-        if (!in_array($typeId, config('import-records.import_record_types'))) {
-            return redirect()->back()->with('error', 'Module type is not found.');
-        }
-
         $this->validateColumns(
             $file,
             $importModuleFile
@@ -34,7 +33,7 @@ class ImportRecordService
             $importRecord = $importRecordQueries->addNew(
                 $file,
                 $typeId,
-                $createdById
+                $metaData
             );
 
             DB::commit();
@@ -149,5 +148,13 @@ class ImportRecordService
         $missingColumns = array_diff($requiredHeaderColumns, array_keys($uploadHeaderColumns));
 
         return [] !== $missingColumns;
+    }
+
+    public function getImportRecordsWithPagination(int $perPage = 15, ?Closure $metaDataFilter = null)
+    {
+        $importRecordQueries = resolve(ImportRecordQueries::class);
+        $importRecords =  $importRecordQueries->getImportRecordsWithPagination($perPage, $metaDataFilter);
+
+        return ImportRecordResource::collection($importRecords)->toArray(request());
     }
 }

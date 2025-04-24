@@ -1,0 +1,10 @@
+<?php
+
+namespace {{ namespace }};
+
+enum ImportRecordType: int
+{
+    case USER = 1;
+    case PRODUCT = 2; // Like this
+    // You can add the others module.
+}

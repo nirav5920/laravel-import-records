@@ -24,68 +24,11 @@ trait DiskBasedFirstMediaUrl
             return '';
         }
 
-        if ('s3' === $media->disk) {
+        if (StorageTypes::S3->value === $media->disk) {
             return $media->getTemporaryUrl(now()->addMinutes(5));
         }
 
         return $media->getUrl();
-    }
-
-    public function getIdAndName(string $collectionName): string
-    {
-        $media = $this->getDiskBasedFirstMedia($collectionName);
-
-        if (! $media instanceof Media) {
-            return '';
-        }
-
-        return $media->getKey() . '/' . $media->getAttribute('file_name');
-    }
-
-    public function getDiskBasedMediaUrls(string $collectionName): array
-    {
-        $medias = [];
-
-        // /* @phpstan-ignore-next-line */
-        foreach ($this->getMedia($collectionName) as $medium) {
-            if ('s3' === $medium->disk) {
-                $medias[] = [
-                    'id' => $medium->getKey(),
-                    'url' => $medium->getTemporaryUrl(now()->addMinutes(5)),
-                ];
-
-                continue;
-            }
-
-            $medias[] = [
-                'id' => $medium->getKey(),
-                'url' => $medium->getUrl(),
-            ];
-        }
-
-        return $medias;
-    }
-
-    public function getDiskBasedMediaIdAndNames(string $collectionName): array
-    {
-        $medias = [];
-
-        // /* @phpstan-ignore-next-line */
-        foreach ($this->getMedia($collectionName) as $medium) {
-            if (StorageTypes::S3->value === $medium->disk) {
-                $medias[] = [
-                    'id_and_name' => $medium->getKey() . '/' . $medium->getAttribute('file_name'),
-                ];
-
-                continue;
-            }
-
-            $medias[] = [
-                'id_and_name' => $medium->getKey() . '/' . $medium->getAttribute('file_name'),
-            ];
-        }
-
-        return $medias;
     }
 
     public function getDiskBasedFirstMedia(string $collectionName): ?Media

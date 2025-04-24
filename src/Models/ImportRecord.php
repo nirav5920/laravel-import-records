@@ -2,6 +2,7 @@
 
 namespace Codebyray\ImportRecords\Models;
 
+use Codebyray\ImportRecords\Enums\Status;
 use Codebyray\ImportRecords\Traits\DiskBasedFirstMediaUrl;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,7 +20,7 @@ class ImportRecord extends Model implements HasMedia
      * @var array<int, string>
      */
     protected $fillable = [
-        'type_id', 'created_by_id', 'columns', 'status', 'total_records', 'records_imported', 'records_failed'
+        'type_id', 'meta_data', 'columns', 'status', 'total_records', 'records_imported', 'records_failed'
     ];
 
     /**
@@ -27,6 +28,8 @@ class ImportRecord extends Model implements HasMedia
      */
     protected $casts = [
         'columns' => 'json',
+        'meta_data' => 'json',
+        'status' => Status::class,
     ];
 
     public function registerMediaCollections(): void

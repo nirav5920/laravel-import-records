@@ -14,4 +14,6 @@ interface ImportRecordClassInterface
     public function validateColumns(array $uploadHeaderColumns): array;
 
     public function save(array $recordDetails, ImportRecord $importRecord): void;
+
+    public function getColumns(): array;
 }

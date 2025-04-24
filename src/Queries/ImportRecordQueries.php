@@ -2,20 +2,23 @@
 
 namespace Codebyray\ImportRecords\Queries;
 
+use Closure;
 use Codebyray\ImportRecords\Enums\Status;
 use Codebyray\ImportRecords\Exports\ImportRecordFailedRowExport;
 use Codebyray\ImportRecords\Models\ImportRecord;
+use Codebyray\ImportRecords\Resources\ImportRecordResource;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Maatwebsite\Excel\Facades\Excel;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class ImportRecordQueries
 {
-    public function addNew(UploadedFile $file, int $typeId, int $createdById)
+    public function addNew(UploadedFile $file, int $typeId, array $metaData)
     {
         $importRecord = ImportRecord::create([
             'type_id' => $typeId,
-            'created_by_id' => $createdById
+            'meta_data' => $metaData,
         ]);
 
         $this->uploadFile($importRecord, $file);
@@ -88,6 +91,19 @@ class ImportRecordQueries
         $importRecord->addMedia($filePath)
             ->setFileName($filename)
             ->toMediaCollection('failed_rows_file');
+    }
+
+    public function getImportRecordsWithPagination(int $perPage = 15, ?Closure $metaDataFilter = null)
+    {
+        $query = ImportRecord::select('id', 'type_id', 'meta_data', 'status', 'total_records', 'records_imported', 'records_failed', 'created_at')
+            ->with('media');
+
+        if ($metaDataFilter) {
+            $metaDataFilter($query);
+        }
+
+        return $query->get();
+        return $query->paginate($perPage);
     }
 
     private function uploadFile(ImportRecord $importRecord, UploadedFile $file): void

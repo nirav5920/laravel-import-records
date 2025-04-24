@@ -35,50 +35,30 @@ php artisan migrate
 
 ## How to Use
 
-### Step 1: Set your module value in import-records.php (Config File)
+### Please run the below command in your application
 
 ```php
-
-use App\Domains\ImportRecord\Enums\ImportRecordType;
-
-return [
-    'import_record_types' => [
-        ImportRecordType::USER->value
-    ],
-];
+    php artisan import-records:make-user-import-assets
 ```
+### OR you can follow the manual process in your application
 
-### Step 2: Create an Enum for your import columns
-
-Create a file for your import columns. For example, if you're importing users:
+### Step 1: Create your Import Type Enum
 
 ```php
 <?php
 
-namespace App\Domains\User\Enums;
+namespace {{ namespace }};
 
-enum UserImportColumns: int
+enum ImportRecordType: int
 {
-    case NAME = 'name';
-    case EMAIL = 'email';
-    case REFERRER_PARTNER_USER_ID = 'referrer_partner_user_id';
+    case USER = 1;
+    case PRODUCT = 2; // Like this
+    // You can add the others module.
 }
 ```
 
-### Step 3: Create an Enum for validation issue types
 
-```php
-<?php
-
-namespace App\Domains\ImportRecord\Enums;
-
-enum ColumnValidationIssueTypes: int
-{
-    case COLUMN_ISSUE = 1;
-}
-```
-
-### Step 4: Create your Import class
+### Step 2: Create your Import class
 
 Create a class that implements `ImportRecordClassInterface`. This class will handle validation and saving of your import data:
 
@@ -87,82 +67,102 @@ Create a class that implements `ImportRecordClassInterface`. This class will han
 
 namespace App\Domains\User\Imports;
 
-use App\Domains\ImportRecord\Enums\ColumnValidationIssueTypes;
 use App\Domains\User\Enums\UserImportColumns;
+use App\Domains\User\Queries\UserQueries;
 use Codebyray\ImportRecords\Interfaces\ImportRecordClassInterface;
 use Codebyray\ImportRecords\Models\ImportRecord;
 use Codebyray\ImportRecords\services\ImportRecordService;
+use Illuminate\Support\Facades\Hash;
 
 class ImportUser implements ImportRecordClassInterface
 {
-    // Validate each row of data
     public function validate(array $userDetails, ImportRecord $importRecord): array
     {
         $validationErrors = [];
-        
-        // Add your validation rules here
-        if (!array_key_exists('name', $userDetails) || !$userDetails['name']) {
+        $userQueries = resolve(UserQueries::class);
+
+        if (! array_key_exists('name', $userDetails) || ! $userDetails['name']) {
             $validationErrors[] = 'The name is required.';
         }
-        
-        if (!array_key_exists('email', $userDetails) || !$userDetails['email']) {
+
+        if (! array_key_exists('email', $userDetails) || ! $userDetails['email']) {
             $validationErrors[] = 'The email is required.';
+        } elseif ($userQueries->existsByEmail((string) $userDetails['email'])) {
+            $validationErrors[] = 'The specified email is already available in our records.';
         }
-        
+
+        if (! array_key_exists('password', $userDetails) || ! $userDetails['password']) {
+            $validationErrors[] = 'The password is required.';
+        }
+
         return $validationErrors;
     }
 
-    // Save each valid row of data
     public function save(array $userDetails, ImportRecord $importRecord): void
     {
-        // Your code to save the record
-        // For example:
-        // User::create([
-        //     'name' => $userDetails['name'],
-        //     'email' => $userDetails['email'],
-        // ]);
+        User::create([
+            'name' => $userDetails['name'],
+            'email' => $userDetails['email'],
+            'password' => Hash::make($userDetails['password']),
+        ]);
     }
 
-    // Validate the column headers in your Excel file
     public function validateColumns(array $uploadHeaderColumns): array
     {
-        $requiredHeaderColumns = collect(UserImportColumns::cases())->pluck('value')->toArray();
+        $requiredHeaderColumns = $this->getColumns();
         $importRecordService = resolve(ImportRecordService::class);
 
         return [
-            'type' => ColumnValidationIssueTypes::COLUMN_ISSUE->value,
             'status' => $importRecordService->validateColumn($requiredHeaderColumns, $uploadHeaderColumns),
+        ];
+    }
+
+    public function getColumns(): array
+    {
+        // Make sure your Excel file has all the required columns with the exact same names.
+        return [
+            'name',
+            'email',
+            'password',
         ];
     }
 }
 ```
 
-### Step 5: Process your import
+### Step 3: Process your import
 
 In your controller or service, you can now process the import:
 
 ```php
+<?php
+
+namespace {{ namespace }};
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Codebyray\ImportRecords\services\ImportRecordService;
 use App\Domains\User\Imports\ImportUser;
 
-// In your controller method
-public function import(Request $request)
+class UserController extends Controller
 {
-    $importRecordService = new ImportRecordService();
-    
-    // Parameters:
-    // 1. The Excel file from the request
-    // 2. The type ID of the import (define this in your config)
-    // 3. The user ID performing the import
-    // 4. Your import class instance
-    $importRecordService->processToImport(
-        $request->upload_file, 
-        $request->type_id, 
-        auth()->id(), 
-        new ImportUser()
-    );
-    
-    return back()->with('success', 'Import started! Check back later for results.');
+    public function import(Request $request)
+    {
+        $importRecordService = new ImportRecordService();
+
+        // you can pass the extra data.
+        $metaData = [
+            'created_by_id' => auth()->id,
+        ];
+
+        $importRecordService->processToImport(
+            $request->upload_file,
+            ImportRecordType::USER->value,
+            $metaData,
+            new ImportUser()
+        );
+
+        return back()->with('success', 'Import process started!');
+    }
 }
 ```
 
@@ -171,9 +171,38 @@ public function import(Request $request)
 For the user import example, your Excel file should have these columns:
 - name
 - email
-- referrer_partner_user_id
+- password
 
-Make sure your Excel file has all the required columns with the exact same names.
+## Fetch Import Records
+
+- This service helps you retrieve paginated import records from the system, with optional metadata filtering.
+
+### ✅ Usage
+```php
+$importRecordService = new ImportRecordService();
+
+$perPage = 10;
+
+// at the import record process time you have passed the metadata. so you can filter with meta_data contains.
+// this parameter is option if you pass the then you can get the filterize data.
+$metaDataFilter = function ($query) {
+    $query->where('meta_data->created_at_by', 2);
+};
+
+$importRecords = $importRecordService->getImportRecordsWithPagination($perPage, $metaDataFilter);
+```
+
+### Returned Fields:
+- Each record includes:
+    - id (Unique identifier of the import record)
+    - type_id (The type or module ID)
+    - meta_data (JSON metadata associated with the import)
+    - status (Status of the import process)
+    - total_records (Total number of rows in the import file)
+    - records_imported (Number of successfully imported records)
+    - records_failed (Number of failed records)
+    - upload_file_url (URL to the originally uploaded file)
+    - failed_records_file_url (URL to download the file containing failed records)
 
 ## Need Help?
 
