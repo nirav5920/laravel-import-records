@@ -183,8 +183,8 @@ $importRecordService = new ImportRecordService();
 
 $perPage = 10;
 
-// at the import record process time you have passed the metadata. so you can filter with meta_data contains.
-// this parameter is option if you pass the then you can get the filterize data.
+// During the import record process, metadata can be passed to help with filtering.
+// This parameter is optional. If provided, it allows you to retrieve filtered data based on the metadata.
 $metaDataFilter = function ($query) {
     $query->where('meta_data->created_at_by', 2);
 };
