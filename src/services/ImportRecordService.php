@@ -9,7 +9,6 @@ use Codebyray\ImportRecords\Http\Resources\ImportRecordResource;
 use Codebyray\ImportRecords\Interfaces\ImportRecordClassInterface;
 use Codebyray\ImportRecords\Jobs\ImportRecordsJob;
 use Codebyray\ImportRecords\Queries\ImportRecordQueries;
-use GuzzleHttp\Psr7\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -39,12 +38,6 @@ class ImportRecordService
             DB::commit();
 
             ImportRecordsJob::dispatch($importRecord, $importModuleFile);
-
-            return back()
-                ->with(
-                    'success',
-                    'File uploaded successfully. The import process will occur in the background. We will notify you by email once the import is complete.'
-                );
 
         } catch (Throwable $throwable) {
             Log::error('Import Record', [
