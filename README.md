@@ -3,6 +3,10 @@
 A simple package to help you import Excel files in Laravel with validation and queue processing.
 This package helps you **import Excel files** into your Laravel app. It checks each row, saves the good ones, and shows you any problems.
 
+## Notes:
+- The import process runs on the `QUEUE_CONNECTION` specified in your environment configuration, and supports `redis`, `database`, and `sync` drivers.
+- We use [[Laravel Media Library](https://github.com/spatie/laravel-medialibrary)] for file uploads, which works based on the `MEDIA_DISK` setting in your environment configuration. By default, files are stored on the `public` disk.
+
 ## What This Package Does
 
 This package makes it easy to:
@@ -11,7 +15,7 @@ This package makes it easy to:
 - Process the records in the background
 - Track import status
 - View successful and failed records
-- Download error reports
+- Download file with failed import records
 
 ## How to Install
 
@@ -21,13 +25,7 @@ This package makes it easy to:
 composer require codebyray/laravel-import-records
 ```
 
-### Step 2: Publish the config and migration files
-
-```bash
-php artisan vendor:publish --provider="Codebyray\ImportRecords\ImportRecordServiceProvider"
-```
-
-### Step 3: Run migrations
+### Step 2: Run migrations
 
 ```bash
 php artisan migrate
@@ -35,33 +33,15 @@ php artisan migrate
 
 ## How to Use
 
-### Please run the below command in your application
-- This command automatically generates all the required files for the import record process.
-
+### Step 1: Please run below command and create the ImportRecordTypes file
 ```php
-php artisan import-records:make-user-import-assets
+php artisan import-records:generate-enum-class
 ```
-### OR you can follow the manual process in your application
-
-### Step 1: Create your Import Type Enum
-
-```php
-<?php
-
-namespace {{ namespace }};
-
-enum ImportRecordType: int
-{
-    case USER = 1;
-    case PRODUCT = 2; // Like this
-    // You can add the others module.
-}
-```
+- You can move it elsewhere if needed.
 
 
-### Step 2: Create your Import class
+### Step 2: Please run below command and create the import user file
 
-Create a class that implements `ImportRecordClassInterface`. This class will handle validation and saving of your import data:
 
 ```php
 <?php

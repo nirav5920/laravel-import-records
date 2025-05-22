@@ -9,9 +9,7 @@ interface ImportRecordClassInterface
     /**
      * @return mixed[]
      */
-    public function validate(array $recordDetails, ImportRecord $importRecord): array;
-
-    public function validateColumns(array $uploadHeaderColumns): array;
+    public function validateColumns(array $recordDetails, ImportRecord $importRecord): array;
 
     public function save(array $recordDetails, ImportRecord $importRecord): void;
 

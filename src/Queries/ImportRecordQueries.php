@@ -73,6 +73,7 @@ class ImportRecordQueries
 
     public function generateFailedRecordsFile(ImportRecord $importRecord): void
     {
+        info($importRecord->records_failed);
         if (! $importRecord->records_failed) {
             return;
         }
@@ -85,13 +86,13 @@ class ImportRecordQueries
         );
 
         $filePath = $binaryFileResponse->getFile()->getPathname();
-
+        info('File path: ' . $filePath);
         $importRecord->addMedia($filePath)
             ->setFileName($filename)
             ->toMediaCollection('failed_rows_file');
     }
 
-    public function getImportRecordsWithPagination(int $perPage = 15, ?Closure $metaDataFilter = null)
+    public function getImportRecordsWithPagination(int $perPage = 15, ?Closure $metaDataFilter = null, string $pageName = 'page')
     {
         $query = ImportRecord::select('id', 'type_id', 'meta_data', 'status', 'total_records', 'records_imported', 'records_failed', 'created_at')
             ->with('media');
@@ -100,8 +101,10 @@ class ImportRecordQueries
             $metaDataFilter($query);
         }
 
-        return $query->get();
-        return $query->paginate($perPage);
+        return $query->paginate(
+            perPage: $perPage,
+            pageName: $pageName
+        );
     }
 
     private function uploadFile(ImportRecord $importRecord, UploadedFile $file): void

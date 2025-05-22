@@ -7,8 +7,8 @@ use Illuminate\Filesystem\Filesystem;
 
 class MakeUserImportAssetsCommand extends Command
 {
-    protected $signature = 'import-records:make-user-import-assets';
-    protected $description = 'Generate UserController, ImportUser class, and ImportRecordType enum';
+    protected $signature = 'create-stub-file-for-users-import';
+    protected $description = 'Generate UserController, ImportUser class';
 
     public function handle(): void
     {
@@ -23,12 +23,6 @@ class MakeUserImportAssetsCommand extends Command
             [
                 'stub' => '/../../stubs/import-user.stub',
                 'target' => app_path('Domains/User/Imports/ImportUser.php'),
-                'namespace' => 'App\\Domains\\User\\Imports',
-            ],
-            [
-                'stub' => '/../../stubs/import-record-type-enum.stub',
-                'target' => app_path('Domains/ImportRecord/Enums/ImportRecordType.php'),
-                'namespace' => 'App\\Domains\\ImportRecord\\Enums',
             ],
         ];
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace {{ namespace }};
+namespace App\Enums;
 
-enum ImportRecordType: int
+enum ImportRecordTypes: int
 {
-    case USER = 1;
-    case PRODUCT = 2; // Like this
-    // You can add the others module.
+    // case USER = 1;
+    // case PRODUCT = 2;
+    // You can add the other modules.
 }

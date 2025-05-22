@@ -118,15 +118,15 @@ class ImportRecordsJob implements ShouldQueueAfterCommit
                 }
             }
 
+            // info($rowIndex);
             if (1 === $rowIndex) {
                 $importRecordQueries->saveHeaderColumns($this->importRecord, $headerColumns);
 
                 continue;
             }
-
             $validationErrors = array_merge(
                 $validationErrors,
-                $this->importModuleFile->validate($recordDetails, $this->importRecord)
+                $this->importModuleFile->validateColumns($recordDetails, $this->importRecord)
             );
 
             try {

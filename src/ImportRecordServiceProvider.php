@@ -9,10 +9,6 @@ class ImportRecordServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        // $this->mergeConfigFrom(
-        //     __DIR__.'/../config/import-records.php', 'import-records'
-        // );
-
         $this->commands([
             MakeUserImportAssetsCommand::class,
         ]);
@@ -25,10 +21,6 @@ class ImportRecordServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
         if ($this->app->runningInConsole()) {
-            // $this->publishes([
-            //     __DIR__.'/../config/import-records.php' => config_path('import-records.php'),
-            // ], 'import-records-config');
-
             $this->publishes([
                 __DIR__.'/../database/migrations' => database_path('migrations'),
             ], 'import-records-migrations');

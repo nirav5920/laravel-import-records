@@ -21,6 +21,8 @@ class ImportRecordFailedRowExport implements FromCollection, WithHeadings, Shoul
     {
         return $this->importRecord->failedRows->map(function ($failedRow): array {
             $failedRowDetails = $failedRow->row_data;
+            info('$failedRowDetails');
+            info($failedRowDetails);
             $rowData = [];
 
             foreach ($this->headings as $heading) {

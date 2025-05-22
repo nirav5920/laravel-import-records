@@ -19,10 +19,10 @@ class ImportRecordService
 {
     public function processToImport(UploadedFile $file, int $typeId, array $metaData, ImportRecordClassInterface $importModuleFile)
     {
-        $this->validateColumns(
-            $file,
-            $importModuleFile
-        );
+        // $this->validateColumns(
+        //     $file,
+        //     $importModuleFile
+        // );
 
         DB::beginTransaction();
 
@@ -113,28 +113,28 @@ class ImportRecordService
         return ! $startRowNumber && ! $endRowNumber;
     }
 
-    public function validateColumns(
-        UploadedFile $uploadFile,
-        ImportRecordClassInterface $importModuleFile,
-    ): void {
-        $spreadsheet = IOFactory::load($uploadFile->getPathname());
-        /** @phpstan-ignore-next-line */
-        $headers = array_flip(collect(current($spreadsheet->getActiveSheet()->toArray()))->filter()->toArray());
+    // public function validateColumns(
+    //     UploadedFile $uploadFile,
+    //     ImportRecordClassInterface $importModuleFile,
+    // ): void {
+    //     $spreadsheet = IOFactory::load($uploadFile->getPathname());
+    //     /** @phpstan-ignore-next-line */
+    //     $headers = array_flip(collect(current($spreadsheet->getActiveSheet()->toArray()))->filter()->toArray());
 
-        $isInvalidHeaderColumns = $importModuleFile->validateColumns($headers);
+    //     $isInvalidHeaderColumns = $importModuleFile->validateColumns($headers);
 
-        if ($isInvalidHeaderColumns['status']) {
-            throw new RedirectBackWithErrorException('Columns do not match with the sample file.');
-        }
+    //     if ($isInvalidHeaderColumns['status']) {
+    //         throw new RedirectBackWithErrorException('Columns do not match with the sample file.');
+    //     }
 
-        if (config('app.env') === 'local') {
-            return;
-        }
+    //     if (config('app.env') === 'local') {
+    //         return;
+    //     }
 
-        if (! $isInvalidHeaderColumns['status']) {
-            return;
-        }
-    }
+    //     if (! $isInvalidHeaderColumns['status']) {
+    //         return;
+    //     }
+    // }
 
     public function validateColumn(array $requiredHeaderColumns, array $uploadHeaderColumns): bool
     {
@@ -143,10 +143,10 @@ class ImportRecordService
         return [] !== $missingColumns;
     }
 
-    public function getImportRecordsWithPagination(int $perPage = 15, ?Closure $metaDataFilter = null)
+    public function getImportRecordsWithPagination(int $perPage = 15, ?Closure $metaDataFilter = null, string $pageName = 'page')
     {
         $importRecordQueries = resolve(ImportRecordQueries::class);
-        $importRecords =  $importRecordQueries->getImportRecordsWithPagination($perPage, $metaDataFilter);
+        $importRecords = $importRecordQueries->getImportRecordsWithPagination($perPage, $metaDataFilter, $pageName);
 
         return ImportRecordResource::collection($importRecords)->toArray(request());
     }

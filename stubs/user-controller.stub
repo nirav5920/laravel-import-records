@@ -1,6 +1,6 @@
 <?php
 
-namespace {{ namespace }};
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -13,7 +13,7 @@ class UserController extends Controller
     {
         $importRecordService = new ImportRecordService();
 
-        // you can pass the extra data.
+        // you can pass the extra metadata.
         $metaData = [
             'created_by_id' => auth()->id,
         ];
