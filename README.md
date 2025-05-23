@@ -41,77 +41,11 @@ php artisan import-records:generate-enum-class
 
 
 ### Step 2: Please run below command and create the import user file
-
-
 ```php
-<?php
-
-namespace App\Domains\User\Imports;
-
-use App\Domains\User\Enums\UserImportColumns;
-use App\Domains\User\Queries\UserQueries;
-use Codebyray\ImportRecords\Interfaces\ImportRecordClassInterface;
-use Codebyray\ImportRecords\Models\ImportRecord;
-use Codebyray\ImportRecords\services\ImportRecordService;
-use Illuminate\Support\Facades\Hash;
-
-class ImportUser implements ImportRecordClassInterface
-{
-    public function validate(array $userDetails, ImportRecord $importRecord): array
-    {
-        $validationErrors = [];
-        $userQueries = resolve(UserQueries::class);
-
-        if (! array_key_exists('name', $userDetails) || ! $userDetails['name']) {
-            $validationErrors[] = 'The name is required.';
-        }
-
-        if (! array_key_exists('email', $userDetails) || ! $userDetails['email']) {
-            $validationErrors[] = 'The email is required.';
-        } elseif ($userQueries->existsByEmail((string) $userDetails['email'])) {
-            $validationErrors[] = 'The specified email is already available in our records.';
-        }
-
-        if (! array_key_exists('password', $userDetails) || ! $userDetails['password']) {
-            $validationErrors[] = 'The password is required.';
-        }
-
-        return $validationErrors;
-    }
-
-    public function save(array $userDetails, ImportRecord $importRecord): void
-    {
-        User::create([
-            'name' => $userDetails['name'],
-            'email' => $userDetails['email'],
-            'password' => Hash::make($userDetails['password']),
-        ]);
-    }
-
-    public function validateColumns(array $uploadHeaderColumns): array
-    {
-        $requiredHeaderColumns = $this->getColumns();
-        $importRecordService = resolve(ImportRecordService::class);
-
-        return [
-            'status' => $importRecordService->validateColumn($requiredHeaderColumns, $uploadHeaderColumns),
-        ];
-    }
-
-    public function getColumns(): array
-    {
-        // Make sure your Excel file has all the required columns with the exact same names.
-        return [
-            'name',
-            'email',
-            'password',
-        ];
-    }
-}
+php artisan import-records:create-stub-file-for-users-import
 ```
 
 ### Step 3: Process your import
-
 In your controller or service, you can now process the import:
 
 ```php
@@ -131,6 +65,7 @@ class UserController extends Controller
         $importRecordService = new ImportRecordService();
 
         // you can pass the extra data.
+        // At the fetch import record, you can filter the data based on this extra data.
         $metaData = [
             'created_by_id' => auth()->id,
         ];

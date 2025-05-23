@@ -11,54 +11,34 @@ use Illuminate\Support\Facades\Hash;
 
 class ImportUser implements ImportRecordClassInterface
 {
-    public function validate(array $userDetails, ImportRecord $importRecord): array
+    public function validateColumns(array $userDetails, ImportRecord $importRecord): array
     {
-        $validationErrors = [];
-        $userQueries = resolve(UserQueries::class);
+        // you can use the laravel validator method for validate data of your excel.
 
-        if (! array_key_exists('name', $userDetails) || ! $userDetails['name']) {
-            $validationErrors[] = 'The name is required.';
+        // For Example:
+        $validator = Validator::make($userDetails, [
+            'name' => ['required'],
+            'email' => [
+                'required',
+                'email',]
+            ]);
+
+        if ($validator->fails()) {
+            return $validator->errors()->all();
         }
 
-        if (! array_key_exists('email', $userDetails) || ! $userDetails['email']) {
-            $validationErrors[] = 'The email is required.';
-        } elseif ($userQueries->existsByEmail((string) $userDetails['email'])) {
-            $validationErrors[] = 'The specified email is already available in our records.';
-        }
-
-        if (! array_key_exists('password', $userDetails) || ! $userDetails['password']) {
-            $validationErrors[] = 'The password is required.';
-        }
-
-        return $validationErrors;
+        return [];
     }
 
     public function save(array $userDetails, ImportRecord $importRecord): void
     {
+        // you can save the data
+
+        // For Example:
         User::create([
             'name' => $userDetails['name'],
             'email' => $userDetails['email'],
             'password' => Hash::make($userDetails['password']),
         ]);
-    }
-
-    public function validateColumns(array $uploadHeaderColumns): array
-    {
-        $requiredHeaderColumns = $this->getColumns();
-        $importRecordService = resolve(ImportRecordService::class);
-
-        return [
-            'status' => $importRecordService->validateColumn($requiredHeaderColumns, $uploadHeaderColumns),
-        ];
-    }
-
-    public function getColumns(): array
-    {
-        // Make sure your Excel file has all the required columns with the exact same names.
-        return [
-            'name',
-            'email',
-            'password',
-        ];
     }
 }

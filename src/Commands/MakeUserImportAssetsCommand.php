@@ -8,7 +8,7 @@ use Illuminate\Filesystem\Filesystem;
 class MakeUserImportAssetsCommand extends Command
 {
     protected $signature = 'create-stub-file-for-users-import';
-    protected $description = 'Generate UserController, ImportUser class';
+    protected $description = 'Generate ImportUser class';
 
     public function handle(): void
     {
@@ -16,13 +16,9 @@ class MakeUserImportAssetsCommand extends Command
 
         $filesToPublish = [
             [
-                'stub' => '/../../stubs/user-controller.stub',
-                'target' => app_path('Http/Controllers/UserController.php'),
-                'namespace' => 'App\\Http\\Controllers',
-            ],
-            [
                 'stub' => '/../../stubs/import-user.stub',
-                'target' => app_path('Domains/User/Imports/ImportUser.php'),
+                'target' => app_path('Imports/ImportUser.php'),
+                'namespace' => 'App\\Imports',
             ],
         ];
 
