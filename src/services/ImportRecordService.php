@@ -17,12 +17,19 @@ use Throwable;
 
 class ImportRecordService
 {
-    public function processToImport(UploadedFile $file, int $typeId, array $metaData, ImportRecordClassInterface $importModuleFile)
+    public function processToImport(UploadedFile $file, array $metaData, ImportRecordClassInterface $importModuleFile)
     {
-        // $this->validateColumns(
-        //     $file,
-        //     $importModuleFile
-        // );
+        $validationHeader = $this->validateUploadedFileColumns(
+            $file,
+            $importModuleFile
+        );
+
+        if (! $validationHeader['status']) {
+            return [
+                'status' => false,
+                'message' => $validationHeader['message'],
+            ];
+        }
 
         DB::beginTransaction();
 
@@ -31,13 +38,18 @@ class ImportRecordService
         try {
             $importRecord = $importRecordQueries->addNew(
                 $file,
-                $typeId,
+                $importModuleFile->moduleTypeId,
                 $metaData
             );
 
             DB::commit();
 
             ImportRecordsJob::dispatch($importRecord, $importModuleFile);
+
+            return [
+                'status' => true,
+                'message' => 'Import started successfully.',
+            ];
 
         } catch (Throwable $throwable) {
             Log::error('Import Record', [
@@ -51,7 +63,10 @@ class ImportRecordService
 
             DB::rollBack();
 
-            throw new RedirectBackWithErrorException('An error occurred. Please try again.');
+            return [
+                'status' => false,
+                'message' => 'Something went wrong while starting the import. Please try again later.',
+            ];
         }
     }
 
@@ -111,6 +126,44 @@ class ImportRecordService
     public function isThisFirstImportCycle(?int $startRowNumber, ?int $endRowNumber): bool
     {
         return ! $startRowNumber && ! $endRowNumber;
+    }
+
+    public function validateUploadedFileColumns(
+        UploadedFile $uploadFile,
+        ImportRecordClassInterface $importModuleFile,
+    ): array {
+        $spreadsheet = IOFactory::load($uploadFile->getPathname());
+        $worksheet = $spreadsheet->getActiveSheet();
+        $totalRows = $worksheet->getHighestRow();
+
+        /** @phpstan-ignore-next-line */
+        $headers = array_flip(collect(current($spreadsheet->getActiveSheet()->toArray()))->filter()->toArray());
+
+        $importFileValidationRules = $importModuleFile->validate();
+        $importFileColumns = array_keys($importFileValidationRules);
+
+        $isInvalidHeaderColumns = $this->validateColumn(
+            $importFileColumns,
+            $headers
+        );
+
+        if ($isInvalidHeaderColumns) {
+            return [
+                'status' => false,
+                'message' => 'Columns do not match with the sample file.',
+            ];
+        }
+
+        if ($totalRows === 1) {
+            return [
+                'status' => false,
+                'message' => 'The uploaded file is empty.',
+            ];
+        }
+
+        return [
+            'status' => true,
+        ];
     }
 
     // public function validateColumns(

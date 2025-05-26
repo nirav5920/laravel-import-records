@@ -11,23 +11,20 @@ use Illuminate\Support\Facades\Hash;
 
 class ImportUser implements ImportRecordClassInterface
 {
-    public function validateColumns(array $userDetails, ImportRecord $importRecord): array
+    public int $moduleTypeId = ImportRecordType::USER->value;
+
+    public function validate(): array
     {
-        // you can use the laravel validator method for validate data of your excel.
+        // You can define the Laravel validation rules here and also list all the columns included in your Excel file.
+        // You can also use custom rules.
 
         // For Example:
-        $validator = Validator::make($userDetails, [
+        return [
             'name' => ['required'],
             'email' => [
                 'required',
-                'email',]
-            ]);
-
-        if ($validator->fails()) {
-            return $validator->errors()->all();
-        }
-
-        return [];
+                'email', new CustomRule()]
+            ];
     }
 
     public function save(array $userDetails, ImportRecord $importRecord): void

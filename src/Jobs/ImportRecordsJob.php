@@ -15,6 +15,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Throwable;
@@ -126,7 +127,7 @@ class ImportRecordsJob implements ShouldQueueAfterCommit
             }
             $validationErrors = array_merge(
                 $validationErrors,
-                $this->importModuleFile->validateColumns($recordDetails, $this->importRecord)
+                $this->validateData($recordDetails)
             );
 
             try {
@@ -193,5 +194,20 @@ class ImportRecordsJob implements ShouldQueueAfterCommit
         Bus::chain([
             new GenerateFailedRecordsFileJob($this->importRecord->id),
         ])->dispatch();
+    }
+
+    private function validateData(array $recordDetails): array
+    {
+        $validationRules =  $this->importModuleFile->validate();
+
+        $validationErrors = [];
+
+        $validation = Validator::make($recordDetails, $validationRules);
+
+        if ($validation->fails()) {
+            $validationErrors = $validation->errors()->all();
+        }
+
+        return $validationErrors;
     }
 }

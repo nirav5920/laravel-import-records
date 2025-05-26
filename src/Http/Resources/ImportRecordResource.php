@@ -3,12 +3,13 @@
 namespace Codebyray\ImportRecords\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\Json\ResourceCollection;
 
-
-class ImportRecordResource extends JsonResource
+class ImportRecordResource extends ResourceCollection
 {
     public function toArray($request): array
     {
+        return ['data' => $this->collection];
         $importRecord = $this->resource;
 
         return [

@@ -17,7 +17,7 @@ This package makes it easy to:
 - View successful and failed records
 - Download file with failed import records
 
-## How to Install
+## Installation
 
 ### Step 1: Install the package using Composer
 
@@ -31,7 +31,17 @@ composer require codebyray/laravel-import-records
 php artisan migrate
 ```
 
-## How to Use
+## Setup
+- The import process runs on the `QUEUE_CONNECTION` specified in your environment configuration, and supports `redis`, `database`, and `sync` drivers.
+- We use [[Laravel Media Library](https://github.com/spatie/laravel-medialibrary)] for file uploads, which works based on the `MEDIA_DISK` setting in your environment configuration. By default, files are stored on the `public` disk.
+- Please setup in your .env file
+
+```env
+QUEUE_CONNECTION=database
+MEDIA_DISK=public
+```
+
+## Usage
 
 ### Step 1: Please run below command and create the ImportRecordTypes file
 ```php
@@ -72,7 +82,6 @@ class UserController extends Controller
 
         $importRecordService->processToImport(
             $request->upload_file,
-            ImportRecordType::USER->value,
             $metaData,
             new ImportUser()
         );
@@ -80,7 +89,6 @@ class UserController extends Controller
         return back()->with('success', 'Import process started!');
     }
 }
-```
 
 ## Example Excel File Format
 
