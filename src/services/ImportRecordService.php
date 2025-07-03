@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Closure;
 use Codebyray\ImportRecords\Exceptions\RedirectBackWithErrorException;
 use Codebyray\ImportRecords\Http\Resources\ImportRecordResource;
+use Codebyray\ImportRecords\Http\Resources\ImportRecordResourceCollection;
 use Codebyray\ImportRecords\Interfaces\ImportRecordClassInterface;
 use Codebyray\ImportRecords\Jobs\ImportRecordsJob;
 use Codebyray\ImportRecords\Queries\ImportRecordQueries;
@@ -196,11 +197,19 @@ class ImportRecordService
         return [] !== $missingColumns;
     }
 
-    public function getImportRecordsWithPagination(int $perPage = 15, ?Closure $metaDataFilter = null, string $pageName = 'page')
+    public function getImportRecordsWithPagination(int $perPage = 10, ?Closure $metaDataFilter = null, string $pageName = 'page')
     {
         $importRecordQueries = resolve(ImportRecordQueries::class);
         $importRecords = $importRecordQueries->getImportRecordsWithPagination($perPage, $metaDataFilter, $pageName);
 
-        return ImportRecordResource::collection($importRecords)->toArray(request());
+        return [
+            'import_records' => ImportRecordResource::collection($importRecords)->toArray(request()),
+            'meta' => [
+                'total' => $importRecords->total(),
+                'per_page' => $importRecords->perPage(),
+                'current_page' => $importRecords->currentPage(),
+                'last_page' => $importRecords->lastPage(),
+            ],
+        ];
     }
 }

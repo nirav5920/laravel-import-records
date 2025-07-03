@@ -92,7 +92,7 @@ class ImportRecordQueries
             ->toMediaCollection('failed_rows_file');
     }
 
-    public function getImportRecordsWithPagination(int $perPage = 15, ?Closure $metaDataFilter = null, string $pageName = 'page')
+    public function getImportRecordsWithPagination(int $perPage = 10, ?Closure $metaDataFilter = null, string $pageName = 'page')
     {
         $query = ImportRecord::select('id', 'type_id', 'meta_data', 'status', 'total_records', 'records_imported', 'records_failed', 'created_at')
             ->with('media');

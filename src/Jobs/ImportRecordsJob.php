@@ -50,7 +50,7 @@ class ImportRecordsJob implements ShouldQueueAfterCommit
         $importRecordService = resolve(ImportRecordService::class);
         $spreadsheetService = resolve(SpreadsheetService::class);
 
-        $headerColumns = $this->importRecord->header_columns ?: [];
+        $headerColumns = $this->importRecord->columns ?: [];
         $jobRestartTime = $importRecordService->getJobRestartTime();
         $media = $importRecordQueries->getUploadedMedia($this->importRecord);
         $fullFilePath = $importRecordQueries->getFilePath($this->importRecord);
@@ -119,7 +119,6 @@ class ImportRecordsJob implements ShouldQueueAfterCommit
                 }
             }
 
-            // info($rowIndex);
             if (1 === $rowIndex) {
                 $importRecordQueries->saveHeaderColumns($this->importRecord, $headerColumns);
 
