@@ -13,7 +13,6 @@ class ImportRecordResource extends JsonResource
         return [
             'id' => $importRecord->id,
             'type_id' => $importRecord->type_id,
-            'meta_data' => $importRecord->meta_data,
             'status' => $importRecord->status->name,
             'total_records' => $importRecord->total_records,
             'records_imported' => $importRecord->records_failed,

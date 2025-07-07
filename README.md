@@ -110,7 +110,7 @@ $perPage = 10;
 // During the import record process, metadata can be passed to help with filtering.
 // This parameter is optional. If provided, it allows you to retrieve filtered data based on the metadata.
 $metaDataFilter = function ($query) {
-    $query->where('meta_data->created_at_by', 2);
+    $query->whereJsonContains('meta_data->created_at_by', 2);
 };
 
 $importRecords = $importRecordService->getImportRecordsWithPagination($perPage, $metaDataFilter);
@@ -120,7 +120,6 @@ $importRecords = $importRecordService->getImportRecordsWithPagination($perPage, 
 - Each record includes:
     - id (Unique identifier of the import record)
     - type_id (The type or module ID)
-    - meta_data (JSON metadata associated with the import)
     - status (Status of the import process)
     - total_records (Total number of rows in the import file)
     - records_imported (Number of successfully imported records)

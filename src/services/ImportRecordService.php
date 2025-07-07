@@ -167,29 +167,6 @@ class ImportRecordService
         ];
     }
 
-    // public function validateColumns(
-    //     UploadedFile $uploadFile,
-    //     ImportRecordClassInterface $importModuleFile,
-    // ): void {
-    //     $spreadsheet = IOFactory::load($uploadFile->getPathname());
-    //     /** @phpstan-ignore-next-line */
-    //     $headers = array_flip(collect(current($spreadsheet->getActiveSheet()->toArray()))->filter()->toArray());
-
-    //     $isInvalidHeaderColumns = $importModuleFile->validateColumns($headers);
-
-    //     if ($isInvalidHeaderColumns['status']) {
-    //         throw new RedirectBackWithErrorException('Columns do not match with the sample file.');
-    //     }
-
-    //     if (config('app.env') === 'local') {
-    //         return;
-    //     }
-
-    //     if (! $isInvalidHeaderColumns['status']) {
-    //         return;
-    //     }
-    // }
-
     public function validateColumn(array $requiredHeaderColumns, array $uploadHeaderColumns): bool
     {
         $missingColumns = array_diff($requiredHeaderColumns, array_keys($uploadHeaderColumns));

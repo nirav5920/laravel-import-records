@@ -97,7 +97,7 @@ class ImportRecordQueries
         $query = ImportRecord::select('id', 'type_id', 'meta_data', 'status', 'total_records', 'records_imported', 'records_failed', 'created_at')
             ->with('media');
 
-        if ($metaDataFilter) {
+        if ($metaDataFilter !== null) {
             $metaDataFilter($query);
         }
 
