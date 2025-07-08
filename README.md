@@ -4,7 +4,7 @@ A simple package to help you import Excel files in Laravel with validation and q
 This package helps you **import Excel files** into your Laravel app. It checks each row, saves the valid ones, and creates a new file with the records with validation errors, if any.
 
 ## Notes:
-- The import process runs on the `QUEUE_CONNECTION` specified in your environment configuration, and supports `redis`, `database`, and `sync` drivers.
+- The import process runs on the `QUEUE_CONNECTION` specified in your environment configuration. We recommend that you set up any async queue driver before using this package to provide the best performance to the users.
 - We use [[Laravel Media Library](https://github.com/spatie/laravel-medialibrary)] for file uploads, which works based on the `MEDIA_DISK` setting in your environment configuration. By default, files are stored on the `public` disk.
 
 ## What This Package Does
