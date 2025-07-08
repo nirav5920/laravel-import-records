@@ -1,7 +1,7 @@
 # Laravel Import Records
 
 A simple package to help you import Excel files in Laravel with validation and queue processing.
-This package helps you **import Excel files** into your Laravel app. It checks each row, saves the good ones, and shows you any problems.
+This package helps you **import Excel files** into your Laravel app. It checks each row, saves the valid ones, and creates a new file with the records with validation errors, if any.
 
 ## Notes:
 - The import process runs on the `QUEUE_CONNECTION` specified in your environment configuration, and supports `redis`, `database`, and `sync` drivers.
