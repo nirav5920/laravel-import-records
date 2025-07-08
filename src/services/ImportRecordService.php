@@ -18,7 +18,7 @@ use Throwable;
 
 class ImportRecordService
 {
-    public function processToImport(UploadedFile $file, array $metaData, ImportRecordClassInterface $importModuleFile)
+    public function processToImport(UploadedFile $file, ImportRecordClassInterface $importModuleFile, array $metaData = []): array
     {
         $validationHeader = $this->validateUploadedFileColumns(
             $file,

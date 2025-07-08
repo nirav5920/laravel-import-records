@@ -7,4 +7,26 @@ enum ImportRecordTypes: int
     // case USER = 1;
     // case PRODUCT = 2;
     // You can add the other modules.
+
+    // You can add your sample file name.
+    // So you can get the file name dynamic
+    public static function getSampleFileName(int $typeId): ?string
+    {
+        $type = self::tryFrom($typeId);
+
+        return match ($type) {
+            self::USER => 'sample_user_import.xlsx',
+            default => null,
+        };
+    }
+
+    // This function for dropdown.
+    // In your form you can add the selection menu.
+    public static function getLabelsAndValuesSelection(): array
+    {
+        return collect(self::cases())->map(fn ($type): array => [
+            'id' => $type->value,
+            'name' => $type->name,
+        ])->toArray();
+    }
 }

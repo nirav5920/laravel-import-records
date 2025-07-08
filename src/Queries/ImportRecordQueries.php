@@ -73,7 +73,6 @@ class ImportRecordQueries
 
     public function generateFailedRecordsFile(ImportRecord $importRecord): void
     {
-        info($importRecord->records_failed);
         if (! $importRecord->records_failed) {
             return;
         }
@@ -86,7 +85,7 @@ class ImportRecordQueries
         );
 
         $filePath = $binaryFileResponse->getFile()->getPathname();
-        info('File path: ' . $filePath);
+
         $importRecord->addMedia($filePath)
             ->setFileName($filename)
             ->toMediaCollection('failed_rows_file');
