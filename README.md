@@ -89,6 +89,7 @@ class UserController extends Controller
         return back()->with('success', 'Import process started!');
     }
 }
+```
 
 ## Example Excel File Format
 
