@@ -9,7 +9,7 @@ enum ImportRecordTypes: int
     // You can add the other modules.
 
     // You can add your sample file name.
-    // So you can get the file name dynamic
+    // You can get the file name dynamic
     public static function getSampleFileName(int $typeId): ?string
     {
         $type = self::tryFrom($typeId);
@@ -28,5 +28,16 @@ enum ImportRecordTypes: int
             'id' => $type->value,
             'name' => $type->name,
         ])->toArray();
+    }
+
+    // You can get the module name by id.
+    public static function getLabel(): ?string
+    {
+        $type = self::tryFrom($typeId);
+
+        return match ($type) {
+            self::USER => 'User',
+            default => null,
+        };
     }
 }
